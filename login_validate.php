@@ -1,20 +1,39 @@
 <?php
 
 require_once 'pdo.php'; // Asegúrate de tener la conexión a la base de datos
+require_once 'utils_validations.php'; // Utiles para validaciones
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Obtener los valores del formulario
-    $name = htmlspecialchars($_POST['name']);
-    $password = htmlspecialchars($_POST['password']);
-
+    
     // Validación de datos (por ejemplo, asegurarse de que los campos no estén vacíos)
-    if (empty($name) || empty($password)) {
-        echo "Por favor, complete todos los campos. <a href='javascript:history.back()'>Intenta de nuevo</a>";
+    if (empty($_POST['name']) || empty($_POST['password'])) {
+        
+        // Si está vacío, devolvemos a login con error 
+        header("Location: login.phtml?error=3");
         exit;
     }
 
+    // Validamos que el usuario tenga la estructura necesaria
+    
+    if(validate_general($_POST['name']) == false){
+        
+        $name = htmlspecialchars($_POST['name']);
+        
+    } else{
+
+        // Si no cumple requisitos, devolvemos a login con error
+        header("Location: login.phtml?error=1");
+        exit;
+    }
+    
+    $password = htmlspecialchars($_POST['password']);
+
     // Verificar si el usuario existe
-    $query = "SELECT account_id, account_name, account_password FROM accounts WHERE account_name = ?";
+    $query = "SELECT account_id, account_name, account_password, account_email, account_role 
+        FROM accounts 
+    WHERE account_name = ?";
+    
     $values = [
         ':account_name' => $name,
     ];
@@ -23,34 +42,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Preparar y ejecutar la consulta
         $res = $pdo->prepare($query);
         $res->execute([$name]);
-
+        
         // Verificar si el usuario existe
         if ($res->rowCount() == 0) {
-            echo "Usuario o contraseña incorrectos. <a href='javascript:history.back()'>Intenta de nuevo</a>";
+            // Si usuario no existe, devolvemos a login con error    
+            header("Location: login.phtml?error=4");
             exit;
         }
 
         // Obtener los resultados
         $user = $res->fetch(PDO::FETCH_ASSOC);
+        
 
         // Verificar la contraseña
         if (!password_verify($password, $user['account_password'])) {
-            echo "Usuario o contraseña incorrectos. <a href='javascript:history.back()'>Intenta de nuevo</a>";
+            // Si no cumple con requisitos, devolvemos a login con error
+
+            header("Location: login.phtml?error=4");            
             exit;
         }
 
         // Si las credenciales son correctas, iniciar sesión
         session_start();
         $_SESSION['user_id'] = $user['account_id'];
-        $_SESSION['username'] = $user['account_name'];
+        $_SESSION['user_username'] = $user['account_name'];
+        $_SESSION['user_email'] = $user['account_email'];
+        $_SESSION['user_role'] = $user['account_role'];
 
-        // Redirigir al usuario a la página principal o dashboard
-        header("Location: index.phtml");
-        exit;
+        if ($user['account_role'] == 2){
+        // Redirigir al usuario a la página para usuarios normales
+            header("Location: index.phtml");
+            exit;
+        }
+        if ($user['account_role'] == 1){
+        // Redirigir al usuario a la página administrador
+            header("Location: dashboard.phtml");
+            exit;
+        }
 
     } catch (PDOException $e) {
-        echo 'Error en la verificación del login: ' . $e->getMessage();
-        exit;
+        // Si ocurre cualquier otro error, devolvemos a login con error
+        //header("Location: login.phtml?error=6");
+        echo $e;
+        //exit;
     }
 }
 ?>

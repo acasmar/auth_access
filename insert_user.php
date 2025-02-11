@@ -3,12 +3,16 @@ require_once 'pdo.php';
 
 session_start();
 
-// Datos de usuario para tests
-$user =  $_SESSION['name'];
+// Datos de usuario para tests.
+$user =  $_SESSION['user_username'];
+$email =  $_SESSION['user_email'];
 
-// No insertar, se inserta la password hasheada ($hash)
-$pass = $_SESSION['password'];
-$role = 'usuario';
+// No insertar, se inserta la password hasheada ($pass_hashed).
+$pass = $_SESSION['user_password'];
+
+// El rol por defecto será ROLE_USER, equivalente a usuario genérico.
+// El admin será 1
+$role = 2;
 
 // Hasheamos la password
 // Opciones para la función password_hash()
@@ -17,13 +21,16 @@ $options = [
 ];
 
 // Hash obtenida
-$hash = password_hash($pass, PASSWORD_BCRYPT, $options);
+$pass_hashed = password_hash($pass, PASSWORD_BCRYPT, $options);
 
 // Query preparada
-$query = 'INSERT INTO accounts (account_name, account_password, account_role) VALUES (:account_name, :account_password, :account_role)';
+$query = 'INSERT INTO accounts (account_name, account_email, account_password, account_role) 
+VALUES (:account_name, :account_email, :account_password, :account_role)';
+
 $values = [
     ':account_name' => $user,
-    ':account_password' => $hash,
+    ':account_email' => $email,
+    ':account_password' => $pass_hashed,
     ':account_role' => $role
 ];
 
@@ -33,8 +40,10 @@ try {
     $res = $pdo->prepare($query);
     $res -> execute($values);
 
-    echo 'Usuario insertado en base de datos';
+    //header("Location: login.phtml?success=1");
+    exit;
 
 } catch (PDOException $e) {
-    echo 'Error en la inserción en la base de datos';
+    header("Location: sign.phtml?error=6");
+    exit;
 }
