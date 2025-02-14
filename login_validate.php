@@ -64,17 +64,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Si las credenciales son correctas, iniciar sesión
         session_start();
-        $_SESSION['user_id'] = $user['account_id'];
+        $_SESSION['user_id'] = $user['account_id']; // TODO: Seguramente innecesario, refactorizar
         $_SESSION['user_username'] = $user['account_name'];
         $_SESSION['user_email'] = $user['account_email'];
         $_SESSION['user_role'] = $user['account_role'];
 
-        if ($user['account_role'] == 2){
+        if ($user['account_role'] == "ROLE_USER"){
         // Redirigir al usuario a la página para usuarios normales
             header("Location: index.phtml");
             exit;
         }
-        if ($user['account_role'] == 1){
+        if ($user['account_role'] == "ROLE_ADMIN"){
         // Redirigir al usuario a la página administrador
             header("Location: dashboard.phtml");
             exit;
@@ -82,8 +82,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     } catch (PDOException $e) {
         // Si ocurre cualquier otro error, devolvemos a login con error
-        //header("Location: login.phtml?error=6");
-        echo $e;
+        header("Location: login.phtml?error=6");
+        
         //exit;
     }
 }

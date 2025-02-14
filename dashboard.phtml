@@ -5,12 +5,12 @@ session_start();
 // Verificar si el usuario está logeado
 if (!isset($_SESSION['user_id'])) {
     // Si no está logeado, redirigir al login
-    header("Location: join.html");
+    header("Location: login.phtml?error=2");
     exit;
 }
 
-if(isset($_SESSION['user_role']) && $_SESSION['user_role'] != 1 ){
-    header("Location: join.html");
+if(isset($_SESSION['user_role']) && $_SESSION['user_role'] != "ROLE_ADMIN" ){
+    header("Location: login.phtml?error=5");
     exit;
 }
 
@@ -48,7 +48,26 @@ if(isset($_SESSION['user_role']) && $_SESSION['user_role'] != 1 ){
             <li class="nav-item"><a class="nav-link text-light" href="#">Inicio</a></li>
             <li class="nav-item"><a class="nav-link text-light" href="#">Reportes</a></li>
             <li class="nav-item"><a class="nav-link text-light" href="#">Usuarios</a></li>
+
         </ul>
+        <?php
+      if (isset ( $_POST ["logout"] )) {
+          session_destroy();
+          $redirectPageUrl= "/join.html";
+          header("Location: ".$redirectPageUrl);
+      }
+    ?>
+    
+    <div class="container text-center mt-3">
+      <form role="form" method="post">
+          <div class="pull-right-container">
+              <i class="icon fa fa-user"> 
+              <input type="submit" value="Cerrar Sesión"
+                  class="btn btn-danger" name="logout" />
+              </i>
+          </div>
+      </form>
+    </div>
     </div>
     <div class="content">
         <h2>Bienvenido al Dashboard</h2>

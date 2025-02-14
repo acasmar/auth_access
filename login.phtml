@@ -33,13 +33,16 @@ if(isset($_GET["error"])){
     $msg = "Su nombre de usuario no cumple con los requisitos establecidos, utilice sólo 'aA09-_'";
   }
   if($error == 2){
-    $msg = "asdasd";
+    $msg = "Necesitas iniciar sesión primero";
   }
   if($error == 3){
     $msg = "Por favor, complete todos los campos.";
   }
   if($error == 4){
     $msg = "Usuario o contraseña incorrectos.";
+  }
+  if($error == 5){
+    $msg = "No estás autorizado para acceder a este sitio.";
   }
   if($error == 6){
     $msg = "Error inesperado, vuelva a intentarlo más tarde o contacte con soporte técnico 666-666-666.";
@@ -64,7 +67,7 @@ if(isset($_GET["error"])){
         <input type="text" class="form-control" id="name" name="name">
         
         <?php if(isset($error) && $error == 1): ?>
-          <p class="fs-6 mb-3 mt-5 text-danger">
+          <p class="fs-6 mb-3 mt-3 text-danger">
             <?=$msg?>
           </p>
         <?php endif;?>
@@ -73,17 +76,10 @@ if(isset($_GET["error"])){
       <div class="mb-3">
         <label for="password" class="form-label">Contraseña</label>
         <input type="password" class="form-control" id="password" name="password">
-        
-        <?php if(isset($error) && $error == 2): ?>
-          <p class="fs-6 mb-3 mt-5 text-danger">
-            <?=$msg?>
-          </p>
-        <?php endif;?>
-
       </div>
 
-      <?php if(isset($error) && $error == 6 || $error == 3 || $error == 4): ?>
-        <p class="fs-6 mb-3 mt-5 text-danger">
+      <?php if(isset($error) && $error == 6 || $error == 5 ||$error == 1 || $error == 2 || $error == 3 || $error == 4): ?>
+        <p class="fs-6 mb-3 mt-3 text-danger">
           <?=$msg?>
         </p>
       <?php endif;?>

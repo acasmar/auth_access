@@ -5,7 +5,7 @@ session_start();
 // Verificar si el usuario está logeado
 if (!isset($_SESSION['user_id'])) {
     // Si no está logeado, redirigir al login
-    header("Location: join.html");
+    header("Location: login.phtml?error=2");
     exit;
 }
 
@@ -24,11 +24,11 @@ if (!isset($_SESSION['user_id'])) {
     <h2 class="text-center">Bienvenido a tu página principal</h2>
     <p class="text-center">¡Hola, <?php echo $_SESSION['user_username']; ?>! Estás logeado.</p>
 
-    <!-- Aquí puedes colocar el contenido principal -->
     <?php
+    // botón para cerrar sesión
       if (isset ( $_POST ["logout"] )) {
           session_destroy();
-          $redirectPageUrl= "/join.html";
+          $redirectPageUrl= "join.html";
           header("Location: ".$redirectPageUrl);
       }
     ?>

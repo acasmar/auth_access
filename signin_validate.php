@@ -1,15 +1,16 @@
 <?php
 
 require_once 'pdo.php';
+require_once 'InsertUser.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Obtener los valores del formulario
-    $name = trim(htmlspecialchars($_POST['name']));
+    $username = trim(htmlspecialchars($_POST['name']));
     $email = trim(htmlspecialchars($_POST['email']));
     $password = trim(htmlspecialchars($_POST['password']));
     $confirmed_password = trim(htmlspecialchars($_POST['confirmed_password']));
 
-    // Validación de inputs
+    // Validación de inputs (Sería interesante separar en una clase que valide todo lo que se le pase.)
     if ($password !== $confirmed_password) {
         header("Location: sign.phtml?error=2");
         exit;
@@ -25,14 +26,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    if (strlen($name) > 16 || strlen($name) < 6) {
+    if (strlen($username) > 16 || strlen($username) < 6) {
         header("Location: sign.phtml?error=1");
         exit;
     }
 
-    // Validación de datos (por ejemplo, asegurarse de que los campos no estén vacíos)
-    if (empty($email) || empty($name) || empty($password) || empty($confirmed_password)) {
-        header("Location: sign.phtml?error=3");
+    if (strlen($username) > 64 || strlen($username) < 5) {
+        header("Location: sign.phtml?error=5");
         exit;
     }
 
@@ -44,40 +44,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Verificar si el usuario ya está registrado
     $query = "SELECT account_id FROM accounts WHERE account_name = ? OR account_email = ?";
     $values = [
-        ':account_name' => $name,
+        ':account_name' => $username,
         ':account_email' => $email,
     ];
 
     try {
         // Preparar y ejecutar la consulta
         $res = $pdo->prepare($query);
-        $res->execute([$name, $email]);
-
-        // Obtenemos el rol
+        $res->execute([$username, $email]);
         
-
-        // Verificar si ya existe el nombre de usuario
+        // Si devuelve mayor que cero, significa que esa fila ya existe, 
+        // por tanto el nombre de usuario o el email están en uso
         if ($res->rowCount() > 0) {
             header("Location: sign.phtml?error=7");
             exit;
         }
     
     } catch (PDOException $e) {
-        echo 'Error en la verificación de la existencia del usuario: ' . $e->getMessage();
+        echo 'Error inesperado, intentelo de nuevo más tarde.';
         exit;
     }
 
-    // Si la validación es exitosa, se redirige al siguiente paso para la inserción
-    // Usamos una variable de sesión para pasar los datos al siguiente paso
-    session_start();
-    $_SESSION['user_username'] = $name;
-    $_SESSION['user_email'] = $email;
-    $_SESSION['user_password'] = $password;
-    $_SESSION['user_role'] = $role;
+    // Creamos instancia que insertará usuario
+    $insertUserObj = new InsertUser($pdo);
 
+    // Le pasamos los datos ya validados y sanitizados para su inserción
+    $insertUserObj->register($username , $email, $password);
 
-    // Redirigir al archivo de inserción
-    header("Location: insert_user.php");
+    // Si la validación es exitosa, se inserta el usuario en la base de datos 
+    // y devuelve al usuario al login con mensaje de exito.
+
     exit;
 }
 
