@@ -33,11 +33,11 @@
 
 - Si visitamos el dominio asignado, nos aparecen dos opciones a elegir, "login" o "registrarse".
     
-    # Primera página si no estamos logeados (sign.html)
-    # Si estamos logeados - LOGIN (login.html)
+    ## Primera página si no estamos logeados (sign.html)
+    ## Si estamos logeados - LOGIN (login.html)
     - Si clicamos en login, habrá una comprobación de sesión, para saber si ya estamos logeados, en caso afirmativo, nos redirige a la página correspondiente según el rol del usuario. Si no estamos logeados, nos redirige a la página de login.
-        # dashboard.phtml (ROLE_ADMIN)
-        # index.phtml (ROLE_USER)
-    # Registrarse
+        ### dashboard.phtml (ROLE_ADMIN)
+        ### index.phtml (ROLE_USER)
+    ## Registrarse
     - Nos redirige a la página de registro.
     - Al registrar usuario, nos redirige a la página de login
